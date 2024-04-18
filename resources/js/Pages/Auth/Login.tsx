@@ -1,97 +1,120 @@
-import { useEffect, FormEventHandler } from 'react';
-import Checkbox from '@/Components/Checkbox';
-import GuestLayout from '@/Layouts/GuestLayout';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { z, ZodError } from "zod";
+import { Button } from "@/Components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/Components/ui/card";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
+import AuthLayout from "@/Layouts/AuthLayout";
+import { Head, useForm } from "@inertiajs/react";
+import { FormEventHandler, useEffect } from "react";
 
-export default function Login({ status, canResetPassword }: { status?: string, canResetPassword: boolean }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false,
-    });
+const LoginSchema = z.object({
+  email: z.string().min(1, { message: "Email is required." }).email(),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters." }),
+});
 
-    useEffect(() => {
-        return () => {
-            reset('password');
-        };
-    }, []);
+export default function Register({
+  status,
+  canResetPassword,
+}: {
+  status?: string;
+  canResetPassword: boolean;
+}) {
+  const { data, setData, post, errors, reset } = useForm({
+    email: "",
+    password: "",
+  });
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-
-        post(route('login'));
+  useEffect(() => {
+    return () => {
+      reset("password");
     };
+  }, []);
 
-    return (
-        <GuestLayout>
-            <Head title="Log in" />
+  const submit: FormEventHandler = (e) => {
+    e.preventDefault();
 
-            {status && <div className="mb-4 font-medium text-sm text-green-600">{status}</div>}
+    try {
+      LoginSchema.parse(data);
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+      post(route("login"));
+    } catch (e: any) {
+      if (e.errors) {
+        e.errors.map((error: any) => {
+          if (error.path) {
+            if (error.path[0] === "email") errors.email = error.message;
+            if (error.path[0] === "password") errors.password = error.message;
+          }
+        });
+      }
+    }
+  };
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
+  return (
+    <AuthLayout>
+      <Head title="Register" />
 
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
+      {status && (
+        <div className="mb-4 font-medium text-sm text-green-600">{status}</div>
+      )}
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+      <form onSubmit={submit}>
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl">Login</CardTitle>
+            <CardDescription>
+              Enter your email below to login to your account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                value={data.email}
+                autoComplete="username"
+                onChange={(e) => setData("email", e.target.value)}
+              />
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
+              {errors.email ? (
+                <p className="text-sm font-medium text-destructive">
+                  {errors.email}
+                </p>
+              ) : null}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                value={data.password}
+                autoComplete="current-password"
+                onChange={(e) => setData("password", e.target.value)}
+              />
 
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="block mt-4">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) => setData('remember', e.target.checked)}
-                        />
-                        <span className="ms-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
-                    </label>
-                </div>
-
-                <div className="flex items-center justify-end mt-4">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
-    );
+              {errors.password ? (
+                <p className="text-sm font-medium text-destructive">
+                  {errors.password}
+                </p>
+              ) : null}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full">Sign in</Button>
+          </CardFooter>
+        </Card>
+      </form>
+    </AuthLayout>
+  );
 }

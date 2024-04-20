@@ -1,10 +1,5 @@
 import { PropsWithChildren } from "react";
-import {
-  CircleUser,
-  Home,
-  Menu,
-  Users,
-} from "lucide-react";
+import { BookOpenText, CircleUser, Home, Menu, Users } from "lucide-react";
 
 import { Button } from "@/Components/ui/button";
 import {
@@ -21,12 +16,12 @@ import { User } from "@/types";
 export default function Authenticated({
   user,
   children,
-}: PropsWithChildren<{ user: User;}>) {
+}: PropsWithChildren<{ user: User }>) {
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
-          <Navigation />
+          <Navigation user={user} />
         </div>
       </div>
       <div className="flex flex-col">
@@ -43,7 +38,7 @@ export default function Authenticated({
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
-              <Navigation />
+              <Navigation user={user} />
             </SheetContent>
           </Sheet>
           <DropdownMenu>
@@ -70,7 +65,7 @@ export default function Authenticated({
   );
 }
 
-function Navigation() {
+function Navigation({ user }: { user: User }) {
   return (
     <>
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -87,9 +82,15 @@ function Navigation() {
             <Home className="h-4 w-4" />
             Dashboard
           </NavItem>
-          <NavItem href={route("users")} active={route().current("users")}>
-            <Users className="h-4 w-4" />
-            Users
+          {user.role === 'admin' ? (
+            <NavItem href={route("users")} active={route().current("users")}>
+              <Users className="h-4 w-4" />
+              Users
+            </NavItem>
+          ) : null}
+          <NavItem href={route("assignments")} active={route().current("assignments")}>
+            <BookOpenText className="h-4 w-4" />
+              Assignments
           </NavItem>
         </nav>
       </div>

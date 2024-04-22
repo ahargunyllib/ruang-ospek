@@ -17,15 +17,6 @@ class UserController extends Controller
       ]);
     }
 
-    public function edit($id)
-    {
-      $user = User::find($id);
-
-      return Inertia::render('EditUser', [
-        'user' => $user
-      ]);
-    }
-
     public function update(Request $request, $id)
     {
       $user = User::find($id);

@@ -34,9 +34,34 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/Components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/Components/ui/select";
+import { FormEventHandler, useState } from "react";
+import { Label } from "@/Components/ui/label";
+import { Input } from "@/Components/ui/input";
 
-export default function Users({ auth, users }: { auth: PageProps; users: User[] }) {
+export default function Users({
+  auth,
+  users,
+}: {
+  auth: PageProps;
+  users: User[];
+}) {
   const authUser: User = auth.user as User;
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,6 +72,26 @@ export default function Users({ auth, users }: { auth: PageProps; users: User[] 
   const minPage = 1;
   const maxPage = Math.ceil(users.length / usersPerPage);
   const { delete: destroy } = useForm();
+
+  const roles = [
+    {
+      name: "Admin",
+      value: "admin",
+    },
+    {
+      name: "Student",
+      value: "student",
+    },
+  ];
+
+  const { data, setData, patch } = useForm({} as User);
+  const [role, setRole] = useState("");
+
+  const submit: FormEventHandler = (e) => {
+    e.preventDefault();
+
+    patch(route("users.update", data.id));
+  };
 
   return (
     <AuthenticatedLayout user={authUser}>
@@ -83,22 +128,112 @@ export default function Users({ auth, users }: { auth: PageProps; users: User[] 
                       {user.email}
                     </TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            aria-haspopup="true"
-                            size="icon"
-                            variant="ghost"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem><Link href={route('users.edit', user.id)}>Edit</Link></DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => destroy(route('users.destroy', user.id))}>Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Dialog>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              aria-haspopup="true"
+                              size="icon"
+                              variant="ghost"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Toggle menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DialogTrigger asChild>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setData(user);
+                                  setRole(user.role);
+                                }}
+                              >
+                                Edit Profile
+                              </DropdownMenuItem>
+                            </DialogTrigger>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                destroy(route("users.destroy", user.id))
+                              }
+                            >
+                              Delete Profile
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>Edit profile</DialogTitle>
+                              <DialogDescription>
+                                Make changes to your profile here. Click save
+                                when you're done.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={submit}>
+                              <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <Label htmlFor="name" className="text-right">
+                                    Name
+                                  </Label>
+                                  <Input
+                                    id="name"
+                                    disabled
+                                    type="text"
+                                    className="col-span-3"
+                                    value={user.name}
+                                  />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <Label htmlFor="email" className="text-right">
+                                    Email
+                                  </Label>
+                                  <Input
+                                    id="email"
+                                    disabled
+                                    type="email"
+                                    className="col-span-3"
+                                    value={user.email}
+                                  />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <Label htmlFor="role" className="text-right">
+                                    Role
+                                  </Label>
+                                  <Select value={role} onValueChange={setRole}>
+                                    <SelectTrigger
+                                      id="role"
+                                      aria-label={role}
+                                      className="col-span-3"
+                                    >
+                                      <SelectValue placeholder={role} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {roles.map((r) => {
+                                        return (
+                                          <SelectItem
+                                            key={r.value}
+                                            value={r.value}
+                                          >
+                                            {r.name}
+                                          </SelectItem>
+                                        );
+                                      })}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                              <DialogFooter>
+                                <DialogClose asChild>
+                                  <Button
+                                    type="submit"
+                                    onClick={() => setData("role", role)}
+                                  >
+                                    Save changes
+                                  </Button>
+                                </DialogClose>
+                              </DialogFooter>
+                            </form>
+                          </DialogContent>
+                        </DropdownMenu>
+                      </Dialog>
                     </TableCell>
                   </TableRow>
                 );

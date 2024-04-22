@@ -27,7 +27,6 @@ Route::middleware('auth')->group(function () {
 
     Route::controller(UserController::class)->group(function () {
       Route::get('/users', [UserController::class, 'index'])->name('users')->middleware(EnsureIsAdmin::class);
-      Route::get('/users/{id}', [UserController::class, 'edit'])->name('users.edit');
       Route::patch('/users/{id}', [UserController::class, 'update'])->name('users.update');
       Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
   });

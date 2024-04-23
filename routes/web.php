@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
 
   Route::controller(AssignmentController::class)->group(function () {
     Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments');
+    Route::post('/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
   });
 });
 

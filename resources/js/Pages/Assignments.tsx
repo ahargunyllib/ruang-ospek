@@ -34,9 +34,10 @@ import {
 } from "@/Components/ui/popover";
 import { Textarea } from "@/Components/ui/textarea";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import dateToString from "@/lib/date";
 import { cn } from "@/lib/utils";
 import { Assignment, PageProps, User } from "@/types";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, Link, useForm } from "@inertiajs/react";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { format, set } from "date-fns";
 import { CalendarIcon, PlusCircleIcon } from "lucide-react";
@@ -177,59 +178,18 @@ export default function Assignments({
         <CardContent>
           <div className="flex flex-col gap-4">
             {currentAssignment.map((assignment: Assignment) => {
-              const days = [
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-              ];
-
-              const months = [
-                "January",
-                "February",
-                "March",
-                "April",
-                "May",
-                "June",
-                "July",
-                "August",
-                "September",
-                "October",
-                "November",
-                "December",
-              ];
-
-              const dayNumber = new Date(assignment.deadline).getDay();
-              const monthNumber = new Date(assignment.deadline).getMonth();
-
-              const day = days[dayNumber];
-              const date = new Date(assignment.deadline).getDate();
-              const month = months[monthNumber];
-              const year = new Date(assignment.deadline).getFullYear();
-              const hours =
-                new Date(assignment.deadline).getHours() < 10
-                  ? `0${new Date(assignment.deadline).getHours()}`
-                  : new Date(assignment.deadline).getHours();
-              const minutes =
-                new Date(assignment.deadline).getMinutes() < 10
-                  ? `0${new Date(assignment.deadline).getMinutes()}`
-                  : new Date(assignment.deadline).getMinutes();
+              const { day, date, month, year, hours, minutes } = dateToString(assignment.deadline)
 
               return (
-                <div
-                  className="p-4 border-border border-2 rounded-xl hover:text-background hover:bg-foreground hover:cursor-pointer hover:-translate-y-2 transition-all duration-300 ease-in-out"
-                  onClick={() => console.log("asd")}
-                  key={assignment.id}
-                >
-                  <h4>{assignment.title}</h4>
-                  <p>
-                    <b>Due</b>: {day}, {date} {month} {year}, {hours}:{minutes}{" "}
-                    WIB
-                  </p>
-                </div>
+                <Link key={assignment.id} href={route("assignments.show", assignment.slug)}>
+                  <div className="p-4 border-border border-2 rounded-xl hover:text-background hover:bg-foreground hover:cursor-pointer hover:-translate-y-2 transition-all duration-300 ease-in-out">
+                    <h4>{assignment.title}</h4>
+                    <p>
+                      <b>Due</b>: {day}, {date} {month} {year}, {hours}:
+                      {minutes} WIB
+                    </p>
+                  </div>
+                </Link>
               );
             })}
           </div>

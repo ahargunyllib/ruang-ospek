@@ -31,4 +31,14 @@ class AssignmentController extends Controller
 
       return redirect()->back();
     }
+
+    public function show($slug){
+      $assignment = Assignment::query()
+        ->where('slug', $slug)
+        ->first();
+
+      return Inertia::render('Assignment', [
+        'assignment' => $assignment
+      ]);
+    }
 }

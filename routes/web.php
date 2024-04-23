@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureIsAdmin;
 use Illuminate\Foundation\Application;
@@ -34,6 +35,11 @@ Route::middleware('auth')->group(function () {
   Route::controller(AssignmentController::class)->group(function () {
     Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments');
     Route::post('/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
+    Route::get('/assignments/{slug}', [AssignmentController::class, 'show'])->name('assignments.show');
+  });
+
+  Route::controller(SubmissionController::class)->group(function () {
+    Route::post('/submissions/{slug}', [SubmissionController::class, 'store'])->name('submissions.store');
   });
 });
 
